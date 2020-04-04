@@ -1,0 +1,41 @@
+#!/bin/bash
+
+###############################################################################
+#                           Authentication Variables                          #
+###############################################################################
+# Credentials in the form of user:password for Kibana
+kCreds=elastic:PASS
+
+###############################################################################
+#                               Kibana Variables                              #
+###############################################################################
+# Kibana server URL <url>:<port>
+kUrl=https://YOUR_SERVER:9243
+# Kibana API endpoint
+kPath=api/saved_objects/_export
+
+###############################################################################
+#                                Start Export                                 #
+#         (Optional) change variables for different output filenames          #
+###############################################################################
+
+# Saved Searches
+searchFilename=search.ndjson
+curl -s -X POST -u $kCreds $kUrl/$kPath -H 'kbn-xsrf: true' -H 'Content-Type: application/json' -d'{"type": "search"}' -o $searchFilename
+
+# Visualizations
+vizFilename=visualization.ndjson
+curl -s -X POST -u $kCreds $kUrl/$kPath -H 'kbn-xsrf: true' -H 'Content-Type: application/json' -d'{"type": "visualization"}' -o $vizFilename
+
+# Dashboards
+dashFilename=dashboard.ndjson
+curl -s -X POST -u $kCreds $kUrl/$kPath -H 'kbn-xsrf: true' -H 'Content-Type: application/json' -d'{"type": "dashboard"}' -o $dashFilename
+
+# Maps
+mapFilename=map.ndjson
+curl -s -X POST -u $kCreds $kUrl/$kPath -H 'kbn-xsrf: true' -H 'Content-Type: application/json' -d'{"type": "map"}' -o $mapFilename
+
+# SIEM rules - API Endpoint is defined in the request itself
+siemFileName=siem-rules.ndjson
+excludeDetails=true
+curl -s -k -OJ -X POST -u $kCreds "$kUrl/api/detection_engine/rules/_export?exclude_export_details=${excludeDetails}&file_name=${siemFileName}" -H 'kbn-xsrf: true'
